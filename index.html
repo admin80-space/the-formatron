@@ -4,339 +4,667 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>The Formatron.</title>
-    <script src="https://unpkg.com/react@18/umd/react.development.js"></script>
-    <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
-    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
-    <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
-    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Courier New', monospace;
+            min-height: 100vh;
+            background: linear-gradient(135deg, #fed7aa, #f87171, #fed7aa);
+            padding: 24px;
+            position: relative;
+            overflow-x: hidden;
+        }
+        
+        .orb {
+            position: absolute;
+            border-radius: 50%;
+            opacity: 0.3;
+            animation: pulse 4s ease-in-out infinite;
+            pointer-events: none;
+            filter: blur(50px);
+        }
+        
+        .orb1 {
+            top: 80px;
+            left: 80px;
+            width: 300px;
+            height: 300px;
+            background: linear-gradient(135deg, #f59e0b, #ea580c);
+        }
+        
+        .orb2 {
+            top: 160px;
+            right: 120px;
+            width: 400px;
+            height: 400px;
+            background: linear-gradient(135deg, #ef4444, #ea580c);
+            animation-delay: 1s;
+        }
+        
+        .orb3 {
+            bottom: 80px;
+            left: 33%;
+            width: 320px;
+            height: 320px;
+            background: linear-gradient(135deg, #ea580c, #f59e0b);
+            animation-delay: 2s;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { opacity: 0.3; transform: scale(1); }
+            50% { opacity: 0.6; transform: scale(1.1); }
+        }
+        
+        .glass {
+            background: rgba(255, 255, 255, 0.2);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            border-radius: 24px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+        }
+        
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            position: relative;
+            z-index: 10;
+        }
+        
+        .header {
+            text-align: center;
+            margin-bottom: 32px;
+        }
+        
+        .title {
+            font-size: 48px;
+            font-weight: bold;
+            background: linear-gradient(135deg, #374151, #991b1b, #ea580c);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 16px;
+        }
+        
+        .subtitle {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            color: #991b1b;
+            font-size: 14px;
+            margin-bottom: 8px;
+        }
+        
+        .credits {
+            color: #dc2626;
+            font-size: 12px;
+            opacity: 0.75;
+            margin-bottom: 24px;
+        }
+        
+        .status {
+            color: #991b1b;
+            animation: blink 1.5s infinite;
+        }
+        
+        @keyframes blink {
+            0%, 50% { opacity: 1; }
+            51%, 100% { opacity: 0.3; }
+        }
+        
+        .main-panel {
+            padding: 32px;
+            margin-bottom: 0;
+        }
+        
+        .stats {
+            display: flex;
+            justify-content: center;
+            gap: 32px;
+            margin-bottom: 32px;
+        }
+        
+        .stat-card {
+            text-align: center;
+            padding: 16px;
+            background: rgba(255, 255, 255, 0.2);
+            border: 1px solid rgba(255, 255, 255, 0.4);
+            border-radius: 16px;
+            min-width: 120px;
+        }
+        
+        .stat-number {
+            font-size: 24px;
+            font-weight: bold;
+            color: #991b1b;
+        }
+        
+        .stat-label {
+            font-size: 10px;
+            color: #991b1b;
+            margin-top: 4px;
+        }
+        
+        .grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 32px;
+            margin-bottom: 32px;
+        }
+        
+        @media (max-width: 1200px) {
+            .grid {
+                grid-template-columns: 1fr;
+            }
+        }
+        
+        .terminal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 16px;
+            border-radius: 16px;
+            margin-bottom: 16px;
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        
+        .terminal-header.input {
+            background: linear-gradient(135deg, rgba(220, 38, 38, 0.3), rgba(234, 88, 12, 0.3));
+            border-color: rgba(220, 38, 38, 0.5);
+        }
+        
+        .terminal-header.output {
+            background: linear-gradient(135deg, rgba(34, 197, 94, 0.3), rgba(16, 185, 129, 0.3));
+            border-color: rgba(34, 197, 94, 0.5);
+        }
+        
+        .terminal-status {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        
+        .status-dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            animation: pulse 2s infinite;
+        }
+        
+        .status-dot.red { background: #ef4444; }
+        .status-dot.green { background: #22c55e; }
+        
+        .terminal-name {
+            font-weight: bold;
+            font-size: 14px;
+        }
+        
+        .input .terminal-name { color: #991b1b; }
+        .output .terminal-name { color: #166534; }
+        
+        .terminal-file {
+            font-size: 10px;
+            color: #991b1b;
+        }
+        
+        .output .terminal-file { color: #166534; }
+        
+        .textarea {
+            width: 100%;
+            height: 320px;
+            padding: 24px;
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            border-radius: 16px;
+            color: #7f1d1d;
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+            resize: none;
+            outline: none;
+            box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        
+        .textarea::placeholder {
+            color: #dc2626;
+            opacity: 0.7;
+        }
+        
+        .textarea:focus {
+            background: rgba(255, 255, 255, 0.2);
+            border-color: rgba(255, 255, 255, 0.4);
+        }
+        
+        .textarea.output {
+            color: #14532d;
+        }
+        
+        .textarea.output::placeholder {
+            color: #22c55e;
+        }
+        
+        .btn-container {
+            display: flex;
+            justify-content: flex-end;
+            margin-top: 16px;
+        }
+        
+        .btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 12px;
+            font-family: 'Courier New', monospace;
+            font-weight: bold;
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .btn:hover {
+            transform: scale(1.05);
+        }
+        
+        .btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+        
+        .btn-primary {
+            background: linear-gradient(135deg, #dc2626, #ea580c);
+            color: white;
+            box-shadow: 0 4px 16px rgba(220, 38, 38, 0.3);
+        }
+        
+        .btn-secondary {
+            background: rgba(255, 255, 255, 0.2);
+            border: 1px solid rgba(255, 255, 255, 0.4);
+            color: #991b1b;
+        }
+        
+        .btn-secondary:hover {
+            background: rgba(255, 255, 255, 0.3);
+        }
+        
+        .command-panel {
+            background: rgba(255, 255, 255, 0.15);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            border-radius: 16px;
+            padding: 24px;
+            text-align: center;
+            margin-bottom: 32px;
+        }
+        
+        .command-title {
+            color: #991b1b;
+            font-size: 10px;
+            margin-bottom: 16px;
+        }
+        
+        .specs-panel {
+            background: rgba(255, 255, 255, 0.15);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            border-radius: 16px;
+            padding: 24px;
+        }
+        
+        .specs-title {
+            color: #991b1b;
+            font-weight: bold;
+            text-align: center;
+            margin-bottom: 16px;
+            font-size: 14px;
+        }
+        
+        .specs-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 16px;
+        }
+        
+        .spec-item {
+            padding: 16px;
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 12px;
+        }
+        
+        .spec-status {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 8px;
+        }
+        
+        .spec-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            animation: pulse 2s infinite;
+        }
+        
+        .spec-status-text {
+            font-size: 10px;
+            font-weight: bold;
+        }
+        
+        .spec-label {
+            color: #991b1b;
+            font-size: 10px;
+        }
+        
+        .processing-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(255, 255, 255, 0.4);
+            backdrop-filter: blur(8px);
+            border-radius: 16px;
+            display: none;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .processing-overlay.show {
+            display: flex;
+        }
+        
+        .processing-content {
+            text-align: center;
+            padding: 32px;
+            background: rgba(255, 255, 255, 0.3);
+            border: 1px solid rgba(255, 255, 255, 0.4);
+            border-radius: 16px;
+        }
+        
+        .processing-icon {
+            font-size: 32px;
+            margin-bottom: 16px;
+            animation: spin 1s linear infinite;
+        }
+        
+        @keyframes spin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+        
+        .processing-text {
+            color: #991b1b;
+            font-weight: bold;
+            animation: blink 1.5s infinite;
+        }
+        
+        .heartbeat {
+            animation: heartbeat 2s infinite;
+        }
+        
+        @keyframes heartbeat {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+        }
+    </style>
 </head>
 <body>
-    <div id="root"></div>
-
-    <script type="text/babel">
-        const { useState } = React;
-        const { Copy, RotateCcw, Wand2, Activity } = lucide;
-
-        function TheFormatron() {
-            const [inputText, setInputText] = useState('');
-            const [outputText, setOutputText] = useState('');
-            const [copied, setCopied] = useState(false);
-            const [isProcessing, setIsProcessing] = useState(false);
-
-            const cleanText = () => {
-                setIsProcessing(true);
-                
-                setTimeout(() => {
-                    let cleaned = inputText;
-                    
-                    // STEP 1: Remove LLM-specific prefixes and artifacts (but preserve the actual content structure)
-                    // Remove common LLM response prefixes/suffixes but keep the poetic structure
-                    cleaned = cleaned.replace(/^(Here's|Here is|I'll|Let me|Sure,|Of course,|Certainly,).*?:\s*/gm, '');
-                    cleaned = cleaned.replace(/^(Assistant|AI|Claude|ChatGPT):\s*/gm, '');
-                    cleaned = cleaned.replace(/^(I'd be happy to|I can help|Let me provide).*$/gm, '');
-                    
-                    // Remove markdown formatting but preserve line structure
-                    cleaned = cleaned.replace(/\*\*(.*?)\*\*/g, '$1'); // Remove **bold** but keep content
-                    cleaned = cleaned.replace(/\*(.*?)\*/g, '$1'); // Remove *italic* but keep content
-                    cleaned = cleaned.replace(/`{1,3}(.*?)`{1,3}/gs, '$1'); // Remove code blocks but keep content
-                    cleaned = cleaned.replace(/^#{1,6}\s*/gm, ''); // Remove markdown headers
-                    
-                    // STEP 2: Clean invisible and problematic characters (but preserve intentional spacing)
-                    // Remove zero-width spaces and similar invisible characters
-                    cleaned = cleaned.replace(/[\u200B-\u200D\uFEFF\u00AD]/g, '');
-                    // Replace non-breaking spaces with regular spaces (but preserve line structure)
-                    cleaned = cleaned.replace(/[\u00A0\u180E\u2000-\u200A\u202F\u205F\u3000]/g, ' ');
-                    // Remove BOM characters
-                    cleaned = cleaned.replace(/^\uFEFF/, '');
-                    
-                    // STEP 3: Normalize quotes and punctuation (preserve poetic punctuation)
-                    cleaned = cleaned.replace(/[\u2018\u2019]/g, "'"); // Smart single quotes to regular
-                    cleaned = cleaned.replace(/[\u201C\u201D]/g, '"'); // Smart double quotes to regular  
-                    cleaned = cleaned.replace(/[\u2013\u2014]/g, '-'); // Em/en dashes to regular dash
-                    cleaned = cleaned.replace(/\u2026/g, '...'); // Ellipsis to three dots
-                    
-                    // STEP 4: Clean spacing CAREFULLY - preserve intentional line breaks and formatting
-                    // Replace tabs with spaces but preserve structure
-                    cleaned = cleaned.replace(/\t/g, ' ');
-                    // Remove trailing spaces at end of lines (but preserve line breaks)
-                    cleaned = cleaned.replace(/[ ]+$/gm, '');
-                    // Remove leading spaces that might be copy/paste artifacts (but preserve intended indentation)
-                    cleaned = cleaned.replace(/^[ ]+/gm, '');
-                    // Clean up multiple spaces within lines (but preserve single spaces)
-                    cleaned = cleaned.replace(/[ ]{2,}/g, ' ');
-                    
-                    // STEP 5: Preserve the poetic line structure - DO NOT mess with intentional line breaks
-                    // Standardize line breaks but PRESERVE the short-line poetic structure
-                    cleaned = cleaned.replace(/\r\n/g, '\n').replace(/\r/g, '\n');
-                    // Only remove excessive empty lines (3 or more), but preserve double line breaks for stanza separation
-                    cleaned = cleaned.replace(/\n{4,}/g, '\n\n\n'); // Keep maximum 3 line breaks for separation
-                    
-                    // STEP 6: Remove only unwanted artifacts, not poetic punctuation
-                    // Clean up any remaining copy-paste artifacts but preserve intentional formatting
-                    
-                    // STEP 7: Final cleanup - preserve the poetic structure
-                    // Remove empty lines at the very beginning
-                    cleaned = cleaned.replace(/^\n+/, '');
-                    // Remove excessive trailing newlines but keep one for copy-paste compatibility
-                    cleaned = cleaned.replace(/\n{3,}$/, '\n');
-                    
-                    // STEP 8: Ensure the format is preserved for Notion and other platforms
-                    // Trim only excessive whitespace, not intentional formatting
-                    cleaned = cleaned.trim();
-                    
-                    // Add a final newline for better copy-paste behavior
-                    if (cleaned && !cleaned.endsWith('\n')) {
-                        cleaned = cleaned + '\n';
-                    }
-                    
-                    setOutputText(cleaned);
-                    setIsProcessing(false);
-                }, 800);
-            };
-
-            const copyToClipboard = async () => {
-                try {
-                    await navigator.clipboard.writeText(outputText);
-                    setCopied(true);
-                    setTimeout(() => setCopied(false), 2000);
-                } catch (err) {
-                    console.error('Failed to copy text: ', err);
-                }
-            };
-
-            const clearAll = () => {
-                setInputText('');
-                setOutputText('');
-                setCopied(false);
-            };
-
-            const wordCount = (text) => {
-                return text.trim() ? text.trim().split(/\s+/).length : 0;
-            };
-
-            return (
-                <div className="min-h-screen bg-gradient-to-br from-orange-200 via-red-300 to-orange-400 p-6 relative overflow-hidden">
-                    {/* Floating glass orbs with desert glow */}
-                    <div className="absolute inset-0 overflow-hidden pointer-events-none">
-                        <div className="absolute top-20 left-20 w-72 h-72 bg-gradient-to-br from-yellow-500/20 to-orange-500/20 rounded-full blur-3xl animate-pulse"></div>
-                        <div className="absolute top-40 right-32 w-96 h-96 bg-gradient-to-br from-red-500/15 to-orange-500/15 rounded-full blur-3xl animate-pulse" style={{animationDelay: '1s'}}></div>
-                        <div className="absolute bottom-20 left-1/3 w-80 h-80 bg-gradient-to-br from-orange-500/20 to-yellow-500/20 rounded-full blur-3xl animate-pulse" style={{animationDelay: '2s'}}></div>
-                    </div>
-
-                    {/* Subtle texture pattern */}
-                    <div className="fixed inset-0 opacity-10">
-                        <div className="absolute inset-0" style={{
-                            backgroundImage: 'radial-gradient(circle at 1px 1px, rgba(139, 69, 19, 0.3) 1px, transparent 0)',
-                            backgroundSize: '60px 60px'
-                        }}></div>
-                    </div>
-                    
-                    <div className="relative max-w-7xl mx-auto">
-                        {/* Clean header without logo box */}
-                        <div className="text-center mb-8">
-                            <div className="mb-6">
-                                <h1 className="text-5xl font-mono font-bold bg-gradient-to-r from-gray-800 via-red-800 to-orange-800 bg-clip-text text-transparent">
-                                    The Formatron.
-                                </h1>
-                                <div className="flex items-center gap-2 mt-2 justify-center">
-                                    <Activity className="w-4 h-4 text-red-600 animate-bounce" />
-                                    <span className="text-red-700 text-sm font-mono">[ ADVANCED TEXT REFORMATION PROTOCOL ]</span>
-                                </div>
-                                <div className="text-red-600 text-xs font-mono mt-2 opacity-75">
-                                    Created by Bella Bonner & Claude
-                                </div>
-                            </div>
-                            
-                            <div className="text-red-700 font-mono animate-pulse">
-                                &gt; STATUS: READY FOR DEPLOYMENT _
-                            </div>
+    <div class="orb orb1"></div>
+    <div class="orb orb2"></div>
+    <div class="orb orb3"></div>
+    
+    <div class="container">
+        <div class="header">
+            <div class="title">The Formatron.</div>
+            <div class="subtitle">
+                <span class="heartbeat">❤️</span>
+                <span>[ ADVANCED TEXT REFORMATION PROTOCOL ]</span>
+            </div>
+            <div class="credits">Created by Bella Bonner & Claude</div>
+            <div class="status">&gt; STATUS: READY FOR DEPLOYMENT _</div>
+        </div>
+        
+        <div class="glass main-panel">
+            <div class="stats">
+                <div class="stat-card glass">
+                    <div class="stat-number" id="inputWords">0</div>
+                    <div class="stat-label">INPUT_WORDS</div>
+                </div>
+                <div class="stat-card glass">
+                    <div class="stat-number" id="outputWords">0</div>
+                    <div class="stat-label">OUTPUT_WORDS</div>
+                </div>
+            </div>
+            
+            <div class="grid">
+                <div>
+                    <div class="terminal-header input">
+                        <div class="terminal-status">
+                            <div class="status-dot red"></div>
+                            <span class="terminal-name">INPUT_TERMINAL</span>
                         </div>
-
-                        {/* Main glass interface with desert styling */}
-                        <div className="bg-white/20 backdrop-blur-2xl rounded-3xl border border-white/30 p-8 shadow-2xl shadow-orange-500/20">
-                            
-                            {/* Desert-style stats bar */}
-                            <div className="flex justify-center gap-8 mb-8">
-                                <div className="text-center p-4 bg-white/20 backdrop-blur-lg rounded-2xl border border-white/40">
-                                    <div className="text-2xl font-mono font-bold text-red-800">{wordCount(inputText)}</div>
-                                    <div className="text-xs text-red-700 font-mono">INPUT_WORDS</div>
-                                </div>
-                                <div className="text-center p-4 bg-white/20 backdrop-blur-lg rounded-2xl border border-white/40">
-                                    <div className="text-2xl font-mono font-bold text-red-800">{wordCount(outputText)}</div>
-                                    <div className="text-xs text-red-700 font-mono">OUTPUT_WORDS</div>
-                                </div>
-                            </div>
-
-                            <div className="grid grid-cols-1 xl:grid-cols-2 gap-8 mb-8">
-                                
-                                {/* Input Terminal */}
-                                <div className="space-y-4">
-                                    <div className="flex items-center justify-between p-4 bg-gradient-to-r from-red-600/30 to-orange-600/30 backdrop-blur-lg rounded-2xl border border-red-500/50">
-                                        <div className="flex items-center gap-3">
-                                            <div className="w-3 h-3 bg-red-500 rounded-full animate-pulse shadow-lg shadow-red-500/50"></div>
-                                            <span className="text-red-800 font-mono font-bold">INPUT_TERMINAL</span>
-                                        </div>
-                                        <div className="text-red-800 font-mono text-xs">RAW_DATA.txt</div>
-                                    </div>
-                                    
-                                    <div className="relative group">
-                                        <textarea
-                                            value={inputText}
-                                            onChange={(e) => setInputText(e.target.value)}
-                                            placeholder="&gt; PASTE POETIC/FORMATTED LLM OUTPUT..."
-                                            className="w-full h-80 p-6 bg-white/10 backdrop-blur-lg border border-white/30 rounded-2xl 
-                                                     text-red-900 placeholder-red-600 font-mono text-sm
-                                                     focus:bg-white/20 focus:border-white/40 focus:outline-none
-                                                     resize-none transition-all duration-300
-                                                     shadow-inner shadow-red-500/20"
-                                        />
-                                        <div className="absolute inset-0 rounded-2xl bg-gradient-to-br from-orange-500/5 to-red-500/5 opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none"></div>
-                                    </div>
-                                    
-                                    {/* FORMATIZE Button below input */}
-                                    <div className="flex justify-end">
-                                        <button
-                                            onClick={cleanText}
-                                            disabled={!inputText.trim() || isProcessing}
-                                            className="group relative px-6 py-3 bg-gradient-to-r from-red-600 to-orange-600 
-                                                     text-white font-mono font-bold rounded-xl
-                                                     hover:from-red-500 hover:to-orange-500
-                                                     disabled:from-gray-600 disabled:to-gray-600
-                                                     disabled:cursor-not-allowed
-                                                     transform hover:scale-105 transition-all duration-200
-                                                     shadow-lg shadow-red-500/30 hover:shadow-xl hover:shadow-red-500/40"
-                                        >
-                                            <div className="flex items-center gap-2">
-                                                <Activity className={`w-4 h-4 ${isProcessing ? 'animate-spin' : 'animate-pulse'}`} />
-                                                <span>{isProcessing ? 'PROCESSING...' : 'FORMATIZE!'}</span>
-                                            </div>
-                                            <div className="absolute inset-0 bg-white/10 rounded-xl opacity-0 group-hover:opacity-100 transition-opacity duration-200"></div>
-                                        </button>
-                                    </div>
-                                </div>
-
-                                {/* Output Terminal */}
-                                <div className="space-y-4">
-                                    <div className="flex items-center justify-between p-4 bg-gradient-to-r from-green-600/30 to-emerald-600/30 backdrop-blur-lg rounded-2xl border border-green-500/50">
-                                        <div className="flex items-center gap-3">
-                                            <div className="w-3 h-3 bg-green-500 rounded-full animate-pulse shadow-lg shadow-green-500/50"></div>
-                                            <span className="text-green-800 font-mono font-bold">OUTPUT_TERMINAL</span>
-                                        </div>
-                                        <div className="text-green-800 font-mono text-xs">CLEAN_DATA.txt</div>
-                                    </div>
-                                    
-                                    <div className="relative group">
-                                        <textarea
-                                            value={outputText}
-                                            readOnly
-                                            placeholder="&gt; CLEANED TEXT READY FOR NOTION & BEYOND..."
-                                            className="w-full h-80 p-6 bg-white/10 backdrop-blur-lg border border-white/30 rounded-2xl 
-                                                     text-green-900 placeholder-green-600 font-mono text-sm
-                                                     resize-none
-                                                     shadow-inner shadow-green-500/20"
-                                        />
-                                        
-                                        {isProcessing && (
-                                            <div className="absolute inset-0 bg-white/40 backdrop-blur-lg rounded-2xl flex items-center justify-center">
-                                                <div className="text-center p-8 bg-white/30 backdrop-blur-lg rounded-2xl border border-white/40">
-                                                    <div className="inline-block animate-spin mb-4">
-                                                        <Wand2 className="w-8 h-8 text-red-700" />
-                                                    </div>
-                                                    <div className="text-red-700 font-mono animate-pulse">
-                                                        [ FORMATIZING IN PROGRESS... ]
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        )}
-                                    </div>
-                                    
-                                    {/* COPY/EXTRACT Button below output */}
-                                    <div className="flex justify-end">
-                                        <button
-                                            onClick={copyToClipboard}
-                                            disabled={!outputText}
-                                            className="group relative px-6 py-3 bg-white/20 backdrop-blur-lg border border-white/40
-                                                     text-red-800 font-mono font-bold rounded-xl
-                                                     hover:bg-white/30 hover:border-white/50
-                                                     disabled:bg-gray-300/50 disabled:text-gray-500 disabled:border-gray-400/50
-                                                     disabled:cursor-not-allowed
-                                                     transform hover:scale-105 transition-all duration-200
-                                                     shadow-lg shadow-gray-500/30 hover:shadow-xl hover:shadow-gray-500/40"
-                                        >
-                                            <div className="flex items-center gap-2">
-                                                <Copy className={`w-4 h-4 ${copied ? 'animate-bounce text-green-600' : ''}`} />
-                                                <span>{copied ? 'COPIED!' : 'EXTRACT'}</span>
-                                            </div>
-                                        </button>
-                                    </div>
-                                </div>
-                            </div>
-
-                            {/* Glass Control Panel - Now only with Clear button */}
-                            <div className="bg-white/15 backdrop-blur-lg rounded-2xl p-6 border border-white/30">
-                                <div className="text-red-700 font-mono text-xs mb-4 text-center">
-                                    [ COMMAND INTERFACE ]
-                                </div>
-                                
-                                <div className="flex justify-center">
-                                    <button
-                                        onClick={clearAll}
-                                        className="group relative px-8 py-4 bg-white/20 backdrop-blur-lg border border-white/40
-                                                 text-red-800 font-mono font-bold rounded-2xl
-                                                 hover:bg-red-100/40 hover:border-red-300/40 hover:text-red-900
-                                                 transform hover:scale-105 transition-all duration-200
-                                                 shadow-lg shadow-gray-500/30 hover:shadow-xl hover:shadow-red-500/30"
-                                    >
-                                        <div className="flex items-center gap-3">
-                                            <RotateCcw className="w-5 h-5" />
-                                            <span className="text-lg">PURGE ALL</span>
-                                        </div>
-                                    </button>
-                                </div>
-                            </div>
-
-                            {/* System Specs with Desert Glass Effect */}
-                            <div className="mt-8 p-6 bg-white/15 backdrop-blur-lg rounded-2xl border border-white/30">
-                                <div className="text-red-700 font-mono font-bold mb-4 text-center">
-                                    [ THE FORMATRON v3.3 - POETIC FORMAT PRESERVATION SYSTEM ]
-                                </div>
-                                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                                    {[
-                                        { status: 'ACTIVE', label: 'FORMAT_PRESERVATION', color: 'orange' },
-                                        { status: 'ENABLED', label: 'ARTIFACT_REMOVAL', color: 'green' },
-                                        { status: 'ON', label: 'LINE_STRUCTURE_PROTECTION', color: 'red' },
-                                        { status: '100%', label: 'POETIC_INTEGRITY', color: 'yellow' },
-                                        { status: 'ACTIVE', label: 'NOTION_OPTIMIZATION', color: 'pink' },
-                                        { status: 'MAXIMUM', label: 'CREATIVE_FIDELITY', color: 'blue' }
-                                    ].map((spec, index) => {
-                                        const colorClasses = {
-                                            orange: 'text-orange-600 bg-orange-500',
-                                            green: 'text-green-600 bg-green-500',
-                                            red: 'text-red-600 bg-red-500',
-                                            yellow: 'text-yellow-600 bg-yellow-500',
-                                            pink: 'text-pink-600 bg-pink-500',
-                                            blue: 'text-blue-600 bg-blue-500'
-                                        };
-                                        
-                                        return (
-                                            <div key={index} className="p-4 bg-white/10 backdrop-blur-lg rounded-xl border border-white/20 hover:bg-white/20 transition-all duration-200">
-                                                <div className="flex items-center gap-2 mb-2">
-                                                    <div className={`w-2 h-2 ${colorClasses[spec.color]} rounded-full animate-pulse shadow-lg`}></div>
-                                                    <span className={`${colorClasses[spec.color]} font-mono text-xs font-bold`}>{spec.status}</span>
-                                                </div>
-                                                <div className="text-red-700 font-mono text-xs">{spec.label}</div>
-                                            </div>
-                                        );
-                                    })}
-                                </div>
-                            </div>
+                        <div class="terminal-file">RAW_DATA.txt</div>
+                    </div>
+                    <textarea 
+                        id="inputText" 
+                        class="textarea"
+                        placeholder="&gt; PASTE POETIC/FORMATTED LLM OUTPUT..."
+                    ></textarea>
+                    <div class="btn-container">
+                        <button id="formatizeBtn" class="btn btn-primary">
+                            <span id="formatIcon" class="heartbeat">❤️</span>
+                            <span id="formatText">FORMATIZE!</span>
+                        </button>
+                    </div>
+                </div>
+                
+                <div style="position: relative;">
+                    <div class="terminal-header output">
+                        <div class="terminal-status">
+                            <div class="status-dot green"></div>
+                            <span class="terminal-name">OUTPUT_TERMINAL</span>
+                        </div>
+                        <div class="terminal-file">CLEAN_DATA.txt</div>
+                    </div>
+                    <textarea 
+                        id="outputText" 
+                        class="textarea output"
+                        placeholder="&gt; CLEANED TEXT READY FOR NOTION & BEYOND..."
+                        readonly
+                    ></textarea>
+                    <div class="btn-container">
+                        <button id="extractBtn" class="btn btn-secondary">
+                            <span id="copyIcon">📋</span>
+                            <span id="copyText">EXTRACT</span>
+                        </button>
+                    </div>
+                    
+                    <div id="processingOverlay" class="processing-overlay">
+                        <div class="processing-content">
+                            <div class="processing-icon">🔄</div>
+                            <div class="processing-text">[ FORMATIZING IN PROGRESS... ]</div>
                         </div>
                     </div>
                 </div>
-            );
+            </div>
+            
+            <div class="command-panel">
+                <div class="command-title">[ COMMAND INTERFACE ]</div>
+                <button id="clearBtn" class="btn btn-secondary">
+                    <span>🔄</span>
+                    <span>PURGE ALL</span>
+                </button>
+            </div>
+            
+            <div class="specs-panel">
+                <div class="specs-title">[ THE FORMATRON v3.3 - POETIC FORMAT PRESERVATION SYSTEM ]</div>
+                <div class="specs-grid">
+                    <div class="spec-item">
+                        <div class="spec-status">
+                            <div class="spec-dot" style="background: #ea580c;"></div>
+                            <span class="spec-status-text" style="color: #ea580c;">ACTIVE</span>
+                        </div>
+                        <div class="spec-label">FORMAT_PRESERVATION</div>
+                    </div>
+                    <div class="spec-item">
+                        <div class="spec-status">
+                            <div class="spec-dot" style="background: #22c55e;"></div>
+                            <span class="spec-status-text" style="color: #22c55e;">ENABLED</span>
+                        </div>
+                        <div class="spec-label">ARTIFACT_REMOVAL</div>
+                    </div>
+                    <div class="spec-item">
+                        <div class="spec-status">
+                            <div class="spec-dot" style="background: #ef4444;"></div>
+                            <span class="spec-status-text" style="color: #ef4444;">ON</span>
+                        </div>
+                        <div class="spec-label">LINE_STRUCTURE_PROTECTION</div>
+                    </div>
+                    <div class="spec-item">
+                        <div class="spec-status">
+                            <div class="spec-dot" style="background: #f59e0b;"></div>
+                            <span class="spec-status-text" style="color: #f59e0b;">100%</span>
+                        </div>
+                        <div class="spec-label">POETIC_INTEGRITY</div>
+                    </div>
+                    <div class="spec-item">
+                        <div class="spec-status">
+                            <div class="spec-dot" style="background: #ec4899;"></div>
+                            <span class="spec-status-text" style="color: #ec4899;">ACTIVE</span>
+                        </div>
+                        <div class="spec-label">NOTION_OPTIMIZATION</div>
+                    </div>
+                    <div class="spec-item">
+                        <div class="spec-status">
+                            <div class="spec-dot" style="background: #3b82f6;"></div>
+                            <span class="spec-status-text" style="color: #3b82f6;">MAXIMUM</span>
+                        </div>
+                        <div class="spec-label">CREATIVE_FIDELITY</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const inputText = document.getElementById('inputText');
+        const outputText = document.getElementById('outputText');
+        const formatizeBtn = document.getElementById('formatizeBtn');
+        const extractBtn = document.getElementById('extractBtn');
+        const clearBtn = document.getElementById('clearBtn');
+        const inputWords = document.getElementById('inputWords');
+        const outputWords = document.getElementById('outputWords');
+        const processingOverlay = document.getElementById('processingOverlay');
+        const formatIcon = document.getElementById('formatIcon');
+        const formatText = document.getElementById('formatText');
+        const copyIcon = document.getElementById('copyIcon');
+        const copyText = document.getElementById('copyText');
+
+        function wordCount(text) {
+            return text.trim() ? text.trim().split(/\s+/).length : 0;
         }
 
-        ReactDOM.render(<TheFormatron />, document.getElementById('root'));
+        function updateWordCounts() {
+            inputWords.textContent = wordCount(inputText.value);
+            outputWords.textContent = wordCount(outputText.value);
+        }
+
+        function cleanText() {
+            let cleaned = inputText.value;
+            
+            cleaned = cleaned.replace(/^(Here's|Here is|I'll|Let me|Sure,|Of course,|Certainly,).*?:\s*/gm, '');
+            cleaned = cleaned.replace(/^(Assistant|AI|Claude|ChatGPT):\s*/gm, '');
+            cleaned = cleaned.replace(/^(I'd be happy to|I can help|Let me provide).*$/gm, '');
+            
+            cleaned = cleaned.replace(/\*\*(.*?)\*\*/g, '$1');
+            cleaned = cleaned.replace(/\*(.*?)\*/g, '$1');
+            cleaned = cleaned.replace(/`{1,3}(.*?)`{1,3}/gs, '$1');
+            cleaned = cleaned.replace(/^#{1,6}\s*/gm, '');
+            
+            cleaned = cleaned.replace(/[\u200B-\u200D\uFEFF\u00AD]/g, '');
+            cleaned = cleaned.replace(/[\u00A0\u180E\u2000-\u200A\u202F\u205F\u3000]/g, ' ');
+            cleaned = cleaned.replace(/^\uFEFF/, '');
+            
+            cleaned = cleaned.replace(/[\u2018\u2019]/g, "'");
+            cleaned = cleaned.replace(/[\u201C\u201D]/g, '"');
+            cleaned = cleaned.replace(/[\u2013\u2014]/g, '-');
+            cleaned = cleaned.replace(/\u2026/g, '...');
+            
+            cleaned = cleaned.replace(/\t/g, ' ');
+            cleaned = cleaned.replace(/[ ]+$/gm, '');
+            cleaned = cleaned.replace(/^[ ]+/gm, '');
+            cleaned = cleaned.replace(/[ ]{2,}/g, ' ');
+            
+            cleaned = cleaned.replace(/\r\n/g, '\n').replace(/\r/g, '\n');
+            cleaned = cleaned.replace(/\n{4,}/g, '\n\n\n');
+            
+            cleaned = cleaned.replace(/^\n+/, '');
+            cleaned = cleaned.replace(/\n{3,}$/, '\n');
+            cleaned = cleaned.trim();
+            
+            if (cleaned && !cleaned.endsWith('\n')) {
+                cleaned = cleaned + '\n';
+            }
+            
+            return cleaned;
+        }
+
+        function formatize() {
+            if (!inputText.value.trim()) return;
+            
+            processingOverlay.classList.add('show');
+            formatizeBtn.disabled = true;
+            formatIcon.style.animation = 'spin 1s linear infinite';
+            formatText.textContent = 'PROCESSING...';
+            
+            setTimeout(() => {
+                const cleaned = cleanText();
+                outputText.value = cleaned;
+                updateWordCounts();
+                
+                processingOverlay.classList.remove('show');
+                formatizeBtn.disabled = false;
+                formatIcon.style.animation = 'heartbeat 2s infinite';
+                formatText.textContent = 'FORMATIZE!';
+            }, 800);
+        }
+
+        async function copyToClipboard() {
+            if (!outputText.value) return;
+            
+            try {
+                await navigator.clipboard.writeText(outputText.value);
+                copyIcon.textContent = '✅';
+                copyText.textContent = 'COPIED!';
+                
+                setTimeout(() => {
+                    copyIcon.textContent = '📋';
+                    copyText.textContent = 'EXTRACT';
+                }, 2000);
+            } catch (err) {
+                console.error('Failed to copy:', err);
+            }
+        }
+
+        function clearAll() {
+            inputText.value = '';
+            outputText.value = '';
+            updateWordCounts();
+        }
+
+        inputText.addEventListener('input', updateWordCounts);
+        formatizeBtn.addEventListener('click', formatize);
+        extractBtn.addEventListener('click', copyToClipboard);
+        clearBtn.addEventListener('click', clearAll);
+
+        updateWordCounts();
     </script>
 </body>
 </html>
