@@ -1,0 +1,342 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>The Formatron.</title>
+    <script src="https://unpkg.com/react@18/umd/react.development.js"></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body>
+    <div id="root"></div>
+
+    <script type="text/babel">
+        const { useState } = React;
+        const { Copy, RotateCcw, Wand2, Activity } = lucide;
+
+        function TheFormatron() {
+            const [inputText, setInputText] = useState('');
+            const [outputText, setOutputText] = useState('');
+            const [copied, setCopied] = useState(false);
+            const [isProcessing, setIsProcessing] = useState(false);
+
+            const cleanText = () => {
+                setIsProcessing(true);
+                
+                setTimeout(() => {
+                    let cleaned = inputText;
+                    
+                    // STEP 1: Remove LLM-specific prefixes and artifacts (but preserve the actual content structure)
+                    // Remove common LLM response prefixes/suffixes but keep the poetic structure
+                    cleaned = cleaned.replace(/^(Here's|Here is|I'll|Let me|Sure,|Of course,|Certainly,).*?:\s*/gm, '');
+                    cleaned = cleaned.replace(/^(Assistant|AI|Claude|ChatGPT):\s*/gm, '');
+                    cleaned = cleaned.replace(/^(I'd be happy to|I can help|Let me provide).*$/gm, '');
+                    
+                    // Remove markdown formatting but preserve line structure
+                    cleaned = cleaned.replace(/\*\*(.*?)\*\*/g, '$1'); // Remove **bold** but keep content
+                    cleaned = cleaned.replace(/\*(.*?)\*/g, '$1'); // Remove *italic* but keep content
+                    cleaned = cleaned.replace(/`{1,3}(.*?)`{1,3}/gs, '$1'); // Remove code blocks but keep content
+                    cleaned = cleaned.replace(/^#{1,6}\s*/gm, ''); // Remove markdown headers
+                    
+                    // STEP 2: Clean invisible and problematic characters (but preserve intentional spacing)
+                    // Remove zero-width spaces and similar invisible characters
+                    cleaned = cleaned.replace(/[\u200B-\u200D\uFEFF\u00AD]/g, '');
+                    // Replace non-breaking spaces with regular spaces (but preserve line structure)
+                    cleaned = cleaned.replace(/[\u00A0\u180E\u2000-\u200A\u202F\u205F\u3000]/g, ' ');
+                    // Remove BOM characters
+                    cleaned = cleaned.replace(/^\uFEFF/, '');
+                    
+                    // STEP 3: Normalize quotes and punctuation (preserve poetic punctuation)
+                    cleaned = cleaned.replace(/[\u2018\u2019]/g, "'"); // Smart single quotes to regular
+                    cleaned = cleaned.replace(/[\u201C\u201D]/g, '"'); // Smart double quotes to regular  
+                    cleaned = cleaned.replace(/[\u2013\u2014]/g, '-'); // Em/en dashes to regular dash
+                    cleaned = cleaned.replace(/\u2026/g, '...'); // Ellipsis to three dots
+                    
+                    // STEP 4: Clean spacing CAREFULLY - preserve intentional line breaks and formatting
+                    // Replace tabs with spaces but preserve structure
+                    cleaned = cleaned.replace(/\t/g, ' ');
+                    // Remove trailing spaces at end of lines (but preserve line breaks)
+                    cleaned = cleaned.replace(/[ ]+$/gm, '');
+                    // Remove leading spaces that might be copy/paste artifacts (but preserve intended indentation)
+                    cleaned = cleaned.replace(/^[ ]+/gm, '');
+                    // Clean up multiple spaces within lines (but preserve single spaces)
+                    cleaned = cleaned.replace(/[ ]{2,}/g, ' ');
+                    
+                    // STEP 5: Preserve the poetic line structure - DO NOT mess with intentional line breaks
+                    // Standardize line breaks but PRESERVE the short-line poetic structure
+                    cleaned = cleaned.replace(/\r\n/g, '\n').replace(/\r/g, '\n');
+                    // Only remove excessive empty lines (3 or more), but preserve double line breaks for stanza separation
+                    cleaned = cleaned.replace(/\n{4,}/g, '\n\n\n'); // Keep maximum 3 line breaks for separation
+                    
+                    // STEP 6: Remove only unwanted artifacts, not poetic punctuation
+                    // Clean up any remaining copy-paste artifacts but preserve intentional formatting
+                    
+                    // STEP 7: Final cleanup - preserve the poetic structure
+                    // Remove empty lines at the very beginning
+                    cleaned = cleaned.replace(/^\n+/, '');
+                    // Remove excessive trailing newlines but keep one for copy-paste compatibility
+                    cleaned = cleaned.replace(/\n{3,}$/, '\n');
+                    
+                    // STEP 8: Ensure the format is preserved for Notion and other platforms
+                    // Trim only excessive whitespace, not intentional formatting
+                    cleaned = cleaned.trim();
+                    
+                    // Add a final newline for better copy-paste behavior
+                    if (cleaned && !cleaned.endsWith('\n')) {
+                        cleaned = cleaned + '\n';
+                    }
+                    
+                    setOutputText(cleaned);
+                    setIsProcessing(false);
+                }, 800);
+            };
+
+            const copyToClipboard = async () => {
+                try {
+                    await navigator.clipboard.writeText(outputText);
+                    setCopied(true);
+                    setTimeout(() => setCopied(false), 2000);
+                } catch (err) {
+                    console.error('Failed to copy text: ', err);
+                }
+            };
+
+            const clearAll = () => {
+                setInputText('');
+                setOutputText('');
+                setCopied(false);
+            };
+
+            const wordCount = (text) => {
+                return text.trim() ? text.trim().split(/\s+/).length : 0;
+            };
+
+            return (
+                <div className="min-h-screen bg-gradient-to-br from-orange-200 via-red-300 to-orange-400 p-6 relative overflow-hidden">
+                    {/* Floating glass orbs with desert glow */}
+                    <div className="absolute inset-0 overflow-hidden pointer-events-none">
+                        <div className="absolute top-20 left-20 w-72 h-72 bg-gradient-to-br from-yellow-500/20 to-orange-500/20 rounded-full blur-3xl animate-pulse"></div>
+                        <div className="absolute top-40 right-32 w-96 h-96 bg-gradient-to-br from-red-500/15 to-orange-500/15 rounded-full blur-3xl animate-pulse" style={{animationDelay: '1s'}}></div>
+                        <div className="absolute bottom-20 left-1/3 w-80 h-80 bg-gradient-to-br from-orange-500/20 to-yellow-500/20 rounded-full blur-3xl animate-pulse" style={{animationDelay: '2s'}}></div>
+                    </div>
+
+                    {/* Subtle texture pattern */}
+                    <div className="fixed inset-0 opacity-10">
+                        <div className="absolute inset-0" style={{
+                            backgroundImage: 'radial-gradient(circle at 1px 1px, rgba(139, 69, 19, 0.3) 1px, transparent 0)',
+                            backgroundSize: '60px 60px'
+                        }}></div>
+                    </div>
+                    
+                    <div className="relative max-w-7xl mx-auto">
+                        {/* Clean header without logo box */}
+                        <div className="text-center mb-8">
+                            <div className="mb-6">
+                                <h1 className="text-5xl font-mono font-bold bg-gradient-to-r from-gray-800 via-red-800 to-orange-800 bg-clip-text text-transparent">
+                                    The Formatron.
+                                </h1>
+                                <div className="flex items-center gap-2 mt-2 justify-center">
+                                    <Activity className="w-4 h-4 text-red-600 animate-bounce" />
+                                    <span className="text-red-700 text-sm font-mono">[ ADVANCED TEXT REFORMATION PROTOCOL ]</span>
+                                </div>
+                                <div className="text-red-600 text-xs font-mono mt-2 opacity-75">
+                                    Created by Bella Bonner & Claude
+                                </div>
+                            </div>
+                            
+                            <div className="text-red-700 font-mono animate-pulse">
+                                &gt; STATUS: READY FOR DEPLOYMENT _
+                            </div>
+                        </div>
+
+                        {/* Main glass interface with desert styling */}
+                        <div className="bg-white/20 backdrop-blur-2xl rounded-3xl border border-white/30 p-8 shadow-2xl shadow-orange-500/20">
+                            
+                            {/* Desert-style stats bar */}
+                            <div className="flex justify-center gap-8 mb-8">
+                                <div className="text-center p-4 bg-white/20 backdrop-blur-lg rounded-2xl border border-white/40">
+                                    <div className="text-2xl font-mono font-bold text-red-800">{wordCount(inputText)}</div>
+                                    <div className="text-xs text-red-700 font-mono">INPUT_WORDS</div>
+                                </div>
+                                <div className="text-center p-4 bg-white/20 backdrop-blur-lg rounded-2xl border border-white/40">
+                                    <div className="text-2xl font-mono font-bold text-red-800">{wordCount(outputText)}</div>
+                                    <div className="text-xs text-red-700 font-mono">OUTPUT_WORDS</div>
+                                </div>
+                            </div>
+
+                            <div className="grid grid-cols-1 xl:grid-cols-2 gap-8 mb-8">
+                                
+                                {/* Input Terminal */}
+                                <div className="space-y-4">
+                                    <div className="flex items-center justify-between p-4 bg-gradient-to-r from-red-600/30 to-orange-600/30 backdrop-blur-lg rounded-2xl border border-red-500/50">
+                                        <div className="flex items-center gap-3">
+                                            <div className="w-3 h-3 bg-red-500 rounded-full animate-pulse shadow-lg shadow-red-500/50"></div>
+                                            <span className="text-red-800 font-mono font-bold">INPUT_TERMINAL</span>
+                                        </div>
+                                        <div className="text-red-800 font-mono text-xs">RAW_DATA.txt</div>
+                                    </div>
+                                    
+                                    <div className="relative group">
+                                        <textarea
+                                            value={inputText}
+                                            onChange={(e) => setInputText(e.target.value)}
+                                            placeholder="&gt; PASTE POETIC/FORMATTED LLM OUTPUT..."
+                                            className="w-full h-80 p-6 bg-white/10 backdrop-blur-lg border border-white/30 rounded-2xl 
+                                                     text-red-900 placeholder-red-600 font-mono text-sm
+                                                     focus:bg-white/20 focus:border-white/40 focus:outline-none
+                                                     resize-none transition-all duration-300
+                                                     shadow-inner shadow-red-500/20"
+                                        />
+                                        <div className="absolute inset-0 rounded-2xl bg-gradient-to-br from-orange-500/5 to-red-500/5 opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none"></div>
+                                    </div>
+                                    
+                                    {/* FORMATIZE Button below input */}
+                                    <div className="flex justify-end">
+                                        <button
+                                            onClick={cleanText}
+                                            disabled={!inputText.trim() || isProcessing}
+                                            className="group relative px-6 py-3 bg-gradient-to-r from-red-600 to-orange-600 
+                                                     text-white font-mono font-bold rounded-xl
+                                                     hover:from-red-500 hover:to-orange-500
+                                                     disabled:from-gray-600 disabled:to-gray-600
+                                                     disabled:cursor-not-allowed
+                                                     transform hover:scale-105 transition-all duration-200
+                                                     shadow-lg shadow-red-500/30 hover:shadow-xl hover:shadow-red-500/40"
+                                        >
+                                            <div className="flex items-center gap-2">
+                                                <Activity className={`w-4 h-4 ${isProcessing ? 'animate-spin' : 'animate-pulse'}`} />
+                                                <span>{isProcessing ? 'PROCESSING...' : 'FORMATIZE!'}</span>
+                                            </div>
+                                            <div className="absolute inset-0 bg-white/10 rounded-xl opacity-0 group-hover:opacity-100 transition-opacity duration-200"></div>
+                                        </button>
+                                    </div>
+                                </div>
+
+                                {/* Output Terminal */}
+                                <div className="space-y-4">
+                                    <div className="flex items-center justify-between p-4 bg-gradient-to-r from-green-600/30 to-emerald-600/30 backdrop-blur-lg rounded-2xl border border-green-500/50">
+                                        <div className="flex items-center gap-3">
+                                            <div className="w-3 h-3 bg-green-500 rounded-full animate-pulse shadow-lg shadow-green-500/50"></div>
+                                            <span className="text-green-800 font-mono font-bold">OUTPUT_TERMINAL</span>
+                                        </div>
+                                        <div className="text-green-800 font-mono text-xs">CLEAN_DATA.txt</div>
+                                    </div>
+                                    
+                                    <div className="relative group">
+                                        <textarea
+                                            value={outputText}
+                                            readOnly
+                                            placeholder="&gt; CLEANED TEXT READY FOR NOTION & BEYOND..."
+                                            className="w-full h-80 p-6 bg-white/10 backdrop-blur-lg border border-white/30 rounded-2xl 
+                                                     text-green-900 placeholder-green-600 font-mono text-sm
+                                                     resize-none
+                                                     shadow-inner shadow-green-500/20"
+                                        />
+                                        
+                                        {isProcessing && (
+                                            <div className="absolute inset-0 bg-white/40 backdrop-blur-lg rounded-2xl flex items-center justify-center">
+                                                <div className="text-center p-8 bg-white/30 backdrop-blur-lg rounded-2xl border border-white/40">
+                                                    <div className="inline-block animate-spin mb-4">
+                                                        <Wand2 className="w-8 h-8 text-red-700" />
+                                                    </div>
+                                                    <div className="text-red-700 font-mono animate-pulse">
+                                                        [ FORMATIZING IN PROGRESS... ]
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        )}
+                                    </div>
+                                    
+                                    {/* COPY/EXTRACT Button below output */}
+                                    <div className="flex justify-end">
+                                        <button
+                                            onClick={copyToClipboard}
+                                            disabled={!outputText}
+                                            className="group relative px-6 py-3 bg-white/20 backdrop-blur-lg border border-white/40
+                                                     text-red-800 font-mono font-bold rounded-xl
+                                                     hover:bg-white/30 hover:border-white/50
+                                                     disabled:bg-gray-300/50 disabled:text-gray-500 disabled:border-gray-400/50
+                                                     disabled:cursor-not-allowed
+                                                     transform hover:scale-105 transition-all duration-200
+                                                     shadow-lg shadow-gray-500/30 hover:shadow-xl hover:shadow-gray-500/40"
+                                        >
+                                            <div className="flex items-center gap-2">
+                                                <Copy className={`w-4 h-4 ${copied ? 'animate-bounce text-green-600' : ''}`} />
+                                                <span>{copied ? 'COPIED!' : 'EXTRACT'}</span>
+                                            </div>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+
+                            {/* Glass Control Panel - Now only with Clear button */}
+                            <div className="bg-white/15 backdrop-blur-lg rounded-2xl p-6 border border-white/30">
+                                <div className="text-red-700 font-mono text-xs mb-4 text-center">
+                                    [ COMMAND INTERFACE ]
+                                </div>
+                                
+                                <div className="flex justify-center">
+                                    <button
+                                        onClick={clearAll}
+                                        className="group relative px-8 py-4 bg-white/20 backdrop-blur-lg border border-white/40
+                                                 text-red-800 font-mono font-bold rounded-2xl
+                                                 hover:bg-red-100/40 hover:border-red-300/40 hover:text-red-900
+                                                 transform hover:scale-105 transition-all duration-200
+                                                 shadow-lg shadow-gray-500/30 hover:shadow-xl hover:shadow-red-500/30"
+                                    >
+                                        <div className="flex items-center gap-3">
+                                            <RotateCcw className="w-5 h-5" />
+                                            <span className="text-lg">PURGE ALL</span>
+                                        </div>
+                                    </button>
+                                </div>
+                            </div>
+
+                            {/* System Specs with Desert Glass Effect */}
+                            <div className="mt-8 p-6 bg-white/15 backdrop-blur-lg rounded-2xl border border-white/30">
+                                <div className="text-red-700 font-mono font-bold mb-4 text-center">
+                                    [ THE FORMATRON v3.3 - POETIC FORMAT PRESERVATION SYSTEM ]
+                                </div>
+                                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                                    {[
+                                        { status: 'ACTIVE', label: 'FORMAT_PRESERVATION', color: 'orange' },
+                                        { status: 'ENABLED', label: 'ARTIFACT_REMOVAL', color: 'green' },
+                                        { status: 'ON', label: 'LINE_STRUCTURE_PROTECTION', color: 'red' },
+                                        { status: '100%', label: 'POETIC_INTEGRITY', color: 'yellow' },
+                                        { status: 'ACTIVE', label: 'NOTION_OPTIMIZATION', color: 'pink' },
+                                        { status: 'MAXIMUM', label: 'CREATIVE_FIDELITY', color: 'blue' }
+                                    ].map((spec, index) => {
+                                        const colorClasses = {
+                                            orange: 'text-orange-600 bg-orange-500',
+                                            green: 'text-green-600 bg-green-500',
+                                            red: 'text-red-600 bg-red-500',
+                                            yellow: 'text-yellow-600 bg-yellow-500',
+                                            pink: 'text-pink-600 bg-pink-500',
+                                            blue: 'text-blue-600 bg-blue-500'
+                                        };
+                                        
+                                        return (
+                                            <div key={index} className="p-4 bg-white/10 backdrop-blur-lg rounded-xl border border-white/20 hover:bg-white/20 transition-all duration-200">
+                                                <div className="flex items-center gap-2 mb-2">
+                                                    <div className={`w-2 h-2 ${colorClasses[spec.color]} rounded-full animate-pulse shadow-lg`}></div>
+                                                    <span className={`${colorClasses[spec.color]} font-mono text-xs font-bold`}>{spec.status}</span>
+                                                </div>
+                                                <div className="text-red-700 font-mono text-xs">{spec.label}</div>
+                                            </div>
+                                        );
+                                    })}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            );
+        }
+
+        ReactDOM.render(<TheFormatron />, document.getElementById('root'));
+    </script>
+</body>
+</html>
